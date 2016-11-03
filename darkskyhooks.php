@@ -4,6 +4,7 @@
         private $api_key;
         private $location;
         private $request_url;
+        private $units;
 
         function __construct($par1Key, $par2Location)
         {
@@ -12,6 +13,7 @@
 
             $this->api_key = $par1Key;
             $this->location = $par2Location;
+            $this->units = 'si';
 
             instantiate();
 
@@ -53,6 +55,21 @@
             $loc['long'] = $response->results[0]->geometry->location->lng;
 
             return $loc;
+        }
+
+        public function setUnits($units) {
+            $this->units = $units;
+        }
+
+        public function getCurrentData() {
+            $response = json_decode(file_get_contents($request_url.'?units='.$units), true);
+
+            if($response == null)
+                return null;
+
+            $response = $response['currently'];
+
+            return $response;
         }
     }
 ?>
