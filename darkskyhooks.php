@@ -8,6 +8,15 @@
         private $latitude;
         private $longitude;
 
+        private $data_blocks = array(
+            'currently',
+            'minutely',
+            'hourly',
+            'daily',
+            'alerts',
+            'flags'
+        );
+
         function __construct($par1Key, $par2Location)
         {
             if(empty($par1Key) || empty($par2Location))
@@ -35,6 +44,10 @@
             return $this->units;
         }
 
+        public function getDisplayUnits() {
+            return ($this->units == 'si' ? 'C' : 'F');
+        }
+
         public function setUnits($units) {
             $this->units = $units;
         }
@@ -51,24 +64,28 @@
             return $this->longitude;
         }
 
+        public function getAllData() {
+            return $this->makeGeneralRequest();
+        }
+
         public function getCurrentData() {
-            return $this->makeRequest('currently');
+            return $this->makeDetailedRequest('currently');
         }
 
         public function getMinutelyData() {
-            return $this->makeRequest('minutely');
+            return $this->makeDetailedRequest('minutely');
         }
 
         public function getHourlyData() {
-            return $this->makeRequest('hourly');
+            return $this->makeDetailedRequest('hourly');
         }
 
         public function getDailyData() {
-            return $this->makeRequest('daily');
+            return $this->makeDetailedRequest('daily');
         }
 
         public function getAlerts() {
-            return $this->makeRequest('alerts');
+            return $this->makeDetailedRequest('alerts');
         }
 
         private function instantiate() {
@@ -99,8 +116,21 @@
             return $loc;
         }
 
-        private function makeRequest($property) {
+        private function makeGeneralRequest() {
             $response = json_decode(file_get_contents($this->request_url.'?units='.$this->units), true);
+
+            return ($response != null ? $response : null);
+        }
+
+        private function makeDetailedRequest($property) {
+            $exclusion = array();
+
+            foreach($this->data_blocks as $key => $value) {
+                if($value != $property)
+                    array_push($exclusion, $value);
+            }
+
+            $response = json_decode(file_get_contents($this->request_url.'?units='.$this->units.'&exclude='.implode(',', $exclusion)), true);
 
             return ($response != null ? $response[$property] : null);
         }
