@@ -5,6 +5,8 @@
         private $location;
         private $request_url;
         private $units;
+        private $latitude;
+        private $longitude;
 
         function __construct($par1Key, $par2Location)
         {
@@ -29,12 +31,52 @@
             }
         }
 
+        public function getUnits() {
+            return $this->units;
+        }
+
+        public function setUnits($units) {
+            $this->units = $units;
+        }
+
+        public function getLocation() {
+            return $this->location;
+        }
+
+        public function getLatitude() {
+            return $this->latitude;
+        }
+
+        public function getLongitude() {
+            return $this->longitude;
+        }
+
+        public function getCurrentData() {
+            return $this->makeRequest('currently');
+        }
+
+        public function getMinutelyData() {
+            return $this->makeRequest('minutely');
+        }
+
+        public function getHourlyData() {
+            return $this->makeRequest('hourly');
+        }
+
+        public function getDailyData() {
+            return $this->makeRequest('daily');
+        }
+
+        public function getAlerts() {
+            return $this->makeRequest('alerts');
+        }
+
         private function instantiate() {
             $latlong = $this->getLatLong($this->location);
-            $lat = $latlong['lat'];
-            $long = $latlong['long'];
+            $this->latitude = $latlong['lat'];
+            $this->longitude = $latlong['long'];
 
-            $this->request_url = "https://api.darksky.net/forecast/{$this->api_key}/{$lat},{$long}";
+            $this->request_url = "https://api.darksky.net/forecast/{$this->api_key}/{$this->latitude},{$this->longitude}";
         }
 
         private function getLatLong($location) {
@@ -57,19 +99,10 @@
             return $loc;
         }
 
-        public function setUnits($units) {
-            $this->units = $units;
-        }
-
-        public function getCurrentData() {
+        private function makeRequest($property) {
             $response = json_decode(file_get_contents($this->request_url.'?units='.$this->units), true);
 
-            if($response == null)
-                return null;
-
-            $response = $response['currently'];
-
-            return $response;
+            return ($response != null ? $response[$property] : null);
         }
     }
 ?>
