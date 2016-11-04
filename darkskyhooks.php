@@ -15,13 +15,13 @@
             $this->location = $par2Location;
             $this->units = 'si';
 
-            instantiate();
+            $this->instantiate();
 
-            if(empty($request_url))
+            if(empty($this->request_url))
                 throw new Exception("Failed to instantiate a DarkSky connection.");
         }
 
-        public static function new($par1Key, $par2Location) {
+        public static function create($par1Key, $par2Location) {
             try {
                 return new DarkSky($par1Key, $par2Location);
             } catch (Exception $e) {
@@ -30,11 +30,11 @@
         }
 
         private function instantiate() {
-            $latlong = getLatLong($location);
+            $latlong = $this->getLatLong($this->location);
             $lat = $latlong['lat'];
             $long = $latlong['long'];
 
-            $request_url = "https://api.darksky.net/forecast/{$api_key}/{$lat},{$long}";
+            $this->request_url = "https://api.darksky.net/forecast/{$this->api_key}/{$lat},{$long}";
         }
 
         private function getLatLong($location) {
@@ -62,7 +62,7 @@
         }
 
         public function getCurrentData() {
-            $response = json_decode(file_get_contents($request_url.'?units='.$units), true);
+            $response = json_decode(file_get_contents($this->request_url.'?units='.$this->units), true);
 
             if($response == null)
                 return null;
