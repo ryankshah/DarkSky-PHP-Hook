@@ -123,12 +123,9 @@
         }
 
         private function makeDetailedRequest($property) {
-            $exclusion = array();
-
-            foreach($this->data_blocks as $key => $value) {
-                if($value != $property)
-                    array_push($exclusion, $value);
-            }
+            $exclusion = array_filter($this->data_blocks, function($el) use ($property) {
+                return $el != $property;
+            });
 
             $response = json_decode(file_get_contents($this->request_url.'?units='.$this->units.'&exclude='.implode(',', $exclusion)), true);
 
